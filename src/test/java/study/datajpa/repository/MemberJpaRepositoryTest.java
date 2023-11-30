@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
+import study.datajpa.entity.Team;
 
 import java.util.List;
 
@@ -86,6 +87,21 @@ class MemberJpaRepositoryTest {
         assertThat(members).hasSize(3);
         assertThat(totalCount).isEqualTo(5);
 
+    }
+
+    @Test
+    void bulkUpdate() {
+        // given
+        memberJpaRepository.save(new Member("memberA", 10));
+        memberJpaRepository.save(new Member("memberB", 10));
+        memberJpaRepository.save(new Member("memberC", 20));
+        memberJpaRepository.save(new Member("memberD", 30));
+        memberJpaRepository.save(new Member("memberE", 40));
+
+        // when
+        int resultCount = memberJpaRepository.bulkAgePlus(20);
+
+        assertThat(resultCount).isEqualTo(3);
     }
 
 }

@@ -1,5 +1,6 @@
 package study.datajpa.repository;
 
+import jakarta.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.shouldHaveThrown;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -30,6 +32,9 @@ class MemberRepositoryTest {
 
     @Autowired
     private TeamRepository teamRepository;
+
+    @Autowired
+    private EntityManager em;
 
     @Test
     public void testMember() {
@@ -170,4 +175,58 @@ class MemberRepositoryTest {
         Page<MemberDto> map = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
     }
 
+    @Test
+    void bulkUpdate() {
+        // given
+        memberRepository.save(new Member("memberA", 10));
+        memberRepository.save(new Member("memberB", 10));
+        memberRepository.save(new Member("memberC", 20));
+        memberRepository.save(new Member("memberD", 30));
+        memberRepository.save(new Member("memberE", 40));
+
+        // when
+        int resultCount = memberRepository.bulkAgePlus(20);
+
+        assertThat(resultCount).isEqualTo(3);
+    }
+
+    @Test
+    void findMemberLazy() {
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+
+        Member member1 = new Member("memberA", 15);
+        Member member2 = new Member("memberB", 15);
+        member1.setTeam(teamA);
+        member2.setTeam(teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        em.flush();
+        em.clear();
+
+        List<Member> members = memberRepository.findMemberFetchJoin();
+    }
+
+    @Test
+    void findMemberEntityGraph() {
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+
+        Member member1 = new Member("memberA", 15);
+        Member member2 = new Member("memberB", 15);
+        member1.setTeam(teamA);
+        member2.setTeam(teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        em.flush();
+        em.clear();
+
+        List<Member> members = memberRepository.findAll();
+    }
 }
