@@ -229,4 +229,30 @@ class MemberRepositoryTest {
 
         List<Member> members = memberRepository.findAll();
     }
+
+    @Test
+    void queryHint() {
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        em.flush();
+        em.clear();
+
+        Member findMember = memberRepository.findById(member1.getId()).get();
+        findMember.setUsername("member2");
+
+        em.flush();
+    }
+
+
+    @Test
+    void querylock() {
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+        em.flush();
+        em.clear();
+
+        List<Member> members = memberRepository.findLockByUsername("member1");
+
+        em.flush();
+    }
 }
