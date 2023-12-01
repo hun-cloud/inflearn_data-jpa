@@ -255,4 +255,10 @@ class MemberRepositoryTest {
 
         em.flush();
     }
+
+    @Test
+    void callCustom() {
+        List<Member> members = memberRepository.findMemberCustom();
+
+    }
 }
